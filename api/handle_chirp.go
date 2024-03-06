@@ -11,7 +11,7 @@ type parameters struct {
 	Message string `json:"body"`
 }
 
-func validateMsg(msg string) string {
+func parseMsg(msg string) string {
 	bannedWords := []string{
 		"kerfuffle",
 		"sharbert",
@@ -34,7 +34,7 @@ func validateMsg(msg string) string {
 	return strings.Join(acc, " ")
 }
 
-func HandleValidateChirp(w http.ResponseWriter, r *http.Request) {
+func HandleChirp(w http.ResponseWriter, r *http.Request) {
 	const maxMsgLen = 140
 
 	decoder := json.NewDecoder(r.Body)
@@ -53,7 +53,7 @@ func HandleValidateChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	succesBody := SuccessMsg{
-		Body: validateMsg(params.Message),
+		Body: parseMsg(params.Message),
 	}
 
 	RespondWithJSON(w, 200, succesBody)

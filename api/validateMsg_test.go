@@ -32,7 +32,7 @@ func TestValidateMsg(t *testing.T) {
 
 	for i, c := range cases {
 		t.Run(fmt.Sprintf("Test case %v", i), func(t *testing.T) {
-			parsedMsg := validateMsg(c.val)
+			parsedMsg := parseMsg(c.val)
 
 			if parsedMsg != c.expectedOutput {
 				t.Errorf(`Expected: %s Got: %s`, c.expectedOutput, parsedMsg)

@@ -18,6 +18,19 @@ func main() {
 	router.Use(middleware.Logger)
 
 	corsMux := middlewareCors(router)
+	db, err := api.NewDB("./databse.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbMem, err := db.LoadDB()
+
+	if err != nil {
+		log.Fatal()
+	}
+
+	for _, chirp := range dbMem.Chirps {
+		fmt.Println(chirp)
+	}
 
 	srv := &http.Server{
 		Addr:    ":" + port,
