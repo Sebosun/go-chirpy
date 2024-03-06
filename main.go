@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/sebosun/chirpy/api"
 )
 
 func main() {
 	const port = "8080"
+	apiConfig := api.ApiConfig{}
 	mux := http.NewServeMux()
 	corsMux := middlewareCors(mux)
 
@@ -17,14 +20,10 @@ func main() {
 	}
 
 	fs := http.StripPrefix("/app/", http.FileServer(http.Dir(".")))
-	mux.Handle("/app/", fs)
 
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type: text/plain; charset=utf-8", "*")
-		var isOk []byte = []byte("OK")
-		w.Write(isOk)
-
-	})
+	mux.Handle("/app/", apiConfig.MiddlewareMetricsInc(fs))
+	mux.HandleFunc("/healthz", api.HandleHealthz)
+	mux.HandleFunc("/metrics", apiConfig.HandleMetrics)
 
 	fmt.Printf("Serving on port %s\n", port)
 	log.Fatal(srv.ListenAndServe())
