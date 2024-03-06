@@ -2,17 +2,19 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/sebosun/chirpy/api"
 	"log"
 	"net/http"
-
-	"github.com/sebosun/chirpy/api"
 )
 
 func main() {
 	const port = "8080"
 	apiConfig := api.ApiConfig{}
-	mux := http.NewServeMux()
-	corsMux := middlewareCors(mux)
+	router := chi.NewRouter()
+	corsMux := middlewareCors(router)
+	router.Use(middleware.Logger)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
@@ -20,11 +22,15 @@ func main() {
 	}
 
 	fs := http.StripPrefix("/app/", http.FileServer(http.Dir(".")))
-	mux.Handle("/app/", apiConfig.MiddlewareMetricsInc(fs))
-	mux.HandleFunc("/reset", apiConfig.HandleReset)
-	mux.HandleFunc("/metrics", apiConfig.HandleMetrics)
+	router.Handle("/app/*", apiConfig.MiddlewareMetricsInc(fs))
 
-	mux.HandleFunc("/healthz", api.HandleHealthz)
+	fs2 := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
+	router.Handle("/app", apiConfig.MiddlewareMetricsInc(fs2))
+
+	router.HandleFunc("/reset", apiConfig.HandleReset)
+
+	router.Get("/metrics", apiConfig.HandleMetrics)
+	router.Get("/healthz", api.HandleHealthz)
 
 	fmt.Printf("Serving on port %s\n", port)
 	log.Fatal(srv.ListenAndServe())
