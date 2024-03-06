@@ -19,8 +19,14 @@ func (cfg *ApiConfig) MiddlewareMetricsInc(next http.Handler) http.Handler {
 
 func (cfg *ApiConfig) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type: text/plain; charset=utf-8", "*")
-	stringHits := fmt.Sprintf("%v", cfg.FileserverHits)
+	stringHits := fmt.Sprintf("Hits: %v", cfg.FileserverHits)
 	cfgAsBytes := []byte(stringHits)
 
 	w.Write(cfgAsBytes)
+}
+
+func (cfg *ApiConfig) HandleReset(w http.ResponseWriter, r *http.Request) {
+	cfg.FileserverHits = 0
+	w.Header().Set("Content-Type: text/plain; charset=utf-8", "*")
+	w.Write([]byte("OK"))
 }

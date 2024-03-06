@@ -20,10 +20,11 @@ func main() {
 	}
 
 	fs := http.StripPrefix("/app/", http.FileServer(http.Dir(".")))
-
 	mux.Handle("/app/", apiConfig.MiddlewareMetricsInc(fs))
-	mux.HandleFunc("/healthz", api.HandleHealthz)
+	mux.HandleFunc("/reset", apiConfig.HandleReset)
 	mux.HandleFunc("/metrics", apiConfig.HandleMetrics)
+
+	mux.HandleFunc("/healthz", api.HandleHealthz)
 
 	fmt.Printf("Serving on port %s\n", port)
 	log.Fatal(srv.ListenAndServe())
