@@ -11,7 +11,7 @@ type ErrorMsg struct {
 }
 
 type SuccessMsg struct {
-	Valid bool `json:"valid"`
+	Body string `json:"cleaned_body"`
 }
 
 func RespondWithError(w http.ResponseWriter, code int, msg string) {

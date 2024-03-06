@@ -53,7 +53,7 @@ func HandleValidateChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	succesBody := SuccessMsg{
-		Valid: true,
+		Body: validateMsg(params.Message),
 	}
 
 	RespondWithJSON(w, 200, succesBody)
