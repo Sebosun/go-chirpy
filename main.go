@@ -27,10 +27,12 @@ func main() {
 	fs2 := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
 	router.Handle("/app", apiConfig.MiddlewareMetricsInc(fs2))
 
-	router.HandleFunc("/reset", apiConfig.HandleReset)
+	apiRouter := chi.NewRouter()
+	apiRouter.HandleFunc("/reset", apiConfig.HandleReset)
+	apiRouter.Get("/metrics", apiConfig.HandleMetrics)
+	apiRouter.Get("/healthz", api.HandleHealthz)
 
-	router.Get("/metrics", apiConfig.HandleMetrics)
-	router.Get("/healthz", api.HandleHealthz)
+	router.Mount("/api", apiRouter)
 
 	fmt.Printf("Serving on port %s\n", port)
 	log.Fatal(srv.ListenAndServe())
