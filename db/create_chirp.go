@@ -1,11 +1,13 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 /* // createChirp creates a new chirp and saves it to disk */
 func (db *DB) CreateChirp(body string) (Chirp, error) {
 	chirps, err := db.GetChirps()
-	fmt.Println(chirps)
 
 	if err != nil {
 		return Chirp{}, err
@@ -13,7 +15,10 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 
 	newId := 1
 
-	/* this assumes its sorted, which given the way were doing things here should be */
+	sort.Slice(chirps, func(i, j int) bool {
+		return chirps[i].Id < chirps[j].Id
+	})
+
 	if len(chirps) > 0 {
 		lastIndx := len(chirps) - 1
 		newId = chirps[lastIndx].Id + 1
