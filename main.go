@@ -8,7 +8,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sebosun/chirpy/api"
-	"github.com/sebosun/chirpy/db"
 )
 
 func main() {
@@ -19,16 +18,6 @@ func main() {
 	router.Use(middleware.Logger)
 
 	corsMux := middlewareCors(router)
-	db, err := db.NewDB("./database.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db.CreateChirp("test chirp")
-
-	chirps, err := db.GetChirps()
-
-	fmt.Println(chirps)
 
 	srv := &http.Server{
 		Addr:    ":" + port,

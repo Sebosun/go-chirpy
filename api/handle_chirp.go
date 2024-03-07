@@ -2,44 +2,28 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/sebosun/chirpy/db"
 	"log"
 	"net/http"
-	"strings"
 )
 
 type parameters struct {
 	Message string `json:"body"`
 }
 
-func parseMsg(msg string) string {
-	bannedWords := []string{
-		"kerfuffle",
-		"sharbert",
-		"fornax",
-	}
-
-	wordsSplit := strings.Split(msg, " ")
-	acc := []string{}
-	for _, word := range wordsSplit {
-
-		appendWord := word
-		for _, bannedWrd := range bannedWords {
-			if strings.ToLower(word) == strings.ToLower(bannedWrd) {
-				appendWord = "****"
-			}
-		}
-		acc = append(acc, appendWord)
-	}
-
-	return strings.Join(acc, " ")
-}
-
 func HandleChirp(w http.ResponseWriter, r *http.Request) {
+	db, err := db.NewDB("./database.json")
+	if err != nil {
+		log.Printf("Error reading from the database", err)
+		RespondWithError(w, 500, "Something went wrong")
+		return
+	}
+
 	const maxMsgLen = 140
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 
 	if err != nil {
 		log.Printf("Error decoding parameters: %s", err)
@@ -52,9 +36,12 @@ func HandleChirp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	succesBody := SuccessMsg{
-		Body: parseMsg(params.Message),
+	item, err := db.CreateChirp(parseMsg(params.Message))
+
+	if err != nil {
+		log.Printf("Error decoding parameters: %s", err)
+		RespondWithError(w, 500, "Something went wrong")
 	}
 
-	RespondWithJSON(w, 200, succesBody)
+	RespondWithJSON(w, 200, item)
 }

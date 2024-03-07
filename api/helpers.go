@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type ErrorMsg struct {
@@ -35,4 +36,27 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	w.Write(dat)
 
+}
+
+func parseMsg(msg string) string {
+	bannedWords := []string{
+		"kerfuffle",
+		"sharbert",
+		"fornax",
+	}
+
+	wordsSplit := strings.Split(msg, " ")
+	acc := []string{}
+	for _, word := range wordsSplit {
+
+		appendWord := word
+		for _, bannedWrd := range bannedWords {
+			if strings.ToLower(word) == strings.ToLower(bannedWrd) {
+				appendWord = "****"
+			}
+		}
+		acc = append(acc, appendWord)
+	}
+
+	return strings.Join(acc, " ")
 }
