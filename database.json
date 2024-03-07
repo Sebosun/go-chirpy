@@ -1,12 +1,1 @@
-{
-  "chirps": {
-    "1": {
-      "id": 1,
-      "body": "This is the first chirp ever!"
-    },
-    "2": {
-      "id": 2,
-      "body": "Hello, world!"
-    }
-  }
-}
+{"chirps":{"1":{"id":1,"body":"test chirp"},"2":{"id":2,"body":"test chirp"},"3":{"id":3,"body":"test chirp"},"4":{"id":4,"body":"test chirp"},"5":{"id":5,"body":"test chirp"},"6":{"id":6,"body":"test chirp"}}}
