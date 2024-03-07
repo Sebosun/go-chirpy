@@ -18,8 +18,11 @@ func apiRouter(cfg *api.ApiConfig) *chi.Mux {
 	apiRouter.HandleFunc("/reset", cfg.HandleReset)
 	apiRouter.Get("/healthz", api.HandleHealthz)
 
-	apiRouter.Post("/chirps", api.HandleCreateChirp)
 	apiRouter.Get("/chirps", api.HandleGetChirp)
+	apiRouter.Post("/chirps", api.HandleCreateChirp)
+
+	apiRouter.Get("/chirps/{id}", api.HandleGetChirpById)
+
 	return apiRouter
 }
 
