@@ -17,7 +17,9 @@ func apiRouter(cfg *api.ApiConfig) *chi.Mux {
 	apiRouter := chi.NewRouter()
 	apiRouter.HandleFunc("/reset", cfg.HandleReset)
 	apiRouter.Get("/healthz", api.HandleHealthz)
-	apiRouter.Post("/chirp", api.HandleChirp)
+
+	apiRouter.Post("/chirps", api.HandleCreateChirp)
+	apiRouter.Get("/chirps", api.HandleGetChirp)
 	return apiRouter
 }
 

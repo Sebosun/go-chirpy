@@ -11,10 +11,10 @@ type parameters struct {
 	Message string `json:"body"`
 }
 
-func HandleChirp(w http.ResponseWriter, r *http.Request) {
+func HandleCreateChirp(w http.ResponseWriter, r *http.Request) {
 	db, err := db.NewDB("./database.json")
 	if err != nil {
-		log.Printf("Error reading from the database", err)
+		log.Println("Error reading from the database", err)
 		RespondWithError(w, 500, "Something went wrong")
 		return
 	}
@@ -43,5 +43,22 @@ func HandleChirp(w http.ResponseWriter, r *http.Request) {
 		RespondWithError(w, 500, "Something went wrong")
 	}
 
-	RespondWithJSON(w, 200, item)
+	RespondWithJSON(w, 201, item)
+}
+
+func HandleGetChirp(w http.ResponseWriter, r *http.Request) {
+	db, err := db.NewDB("./database.json")
+	if err != nil {
+		log.Println("Error accessing db", err)
+		RespondWithError(w, 500, "Something went wrong")
+	}
+
+	chirps, err := db.GetChirps()
+
+	if err != nil {
+		log.Println("Error accessing db", err)
+		RespondWithError(w, 500, "Something went wrong")
+	}
+
+	RespondWithJSON(w, 200, chirps)
 }
