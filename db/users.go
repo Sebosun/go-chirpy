@@ -1,11 +1,20 @@
 package db
 
-import "sort"
+import (
+	"sort"
 
-func (db *DB) CreateUser(email string) (User, error) {
+	"golang.org/x/crypto/bcrypt"
+)
+
+type createdUser struct {
+	Id    int
+	Email string
+}
+
+func (db *DB) CreateUser(email string, password string) (createdUser, error) {
 	users, err := db.GetUsers()
 	if err != nil {
-		return User{}, err
+		return createdUser{}, err
 	}
 
 	newId := 1
@@ -19,9 +28,16 @@ func (db *DB) CreateUser(email string) (User, error) {
 		newId = users[lastIndx].Id + 1
 	}
 
+	hashedPaswd, err := bcrypt.GenerateFromPassword([]byte(password), 4)
+
+	if err != nil {
+		return createdUser{}, err
+
+	}
 	newUser := User{
-		Id:    newId,
-		Email: email,
+		Id:       newId,
+		Email:    email,
+		Password: string(hashedPaswd),
 	}
 
 	dbMap, err := db.loadDB()
@@ -30,11 +46,15 @@ func (db *DB) CreateUser(email string) (User, error) {
 	err = db.writeDB(dbMap)
 
 	if err != nil {
-		return User{}, err
+		return createdUser{}, err
 	}
 
-	return newUser, nil
+	userReturned := createdUser{
+		Id:    newUser.Id,
+		Email: newUser.Email,
+	}
 
+	return userReturned, nil
 }
 
 func (db *DB) GetUsers() ([]User, error) {

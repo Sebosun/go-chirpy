@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	/* "github.com/sebosun/chirpy/db" */)
+)
 
 type userBody struct {
-	Email string `json:"email"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (api *ApiConfig) HandleCreateUsers(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +23,7 @@ func (api *ApiConfig) HandleCreateUsers(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	createdUser, err := api.DB.CreateUser(user.Email)
+	createdUser, err := api.DB.CreateUser(user.Email, user.Password)
 	if err != nil {
 		log.Printf("Error creating user:  %s", err)
 		RespondWithError(w, 500, "Something went wrong")
