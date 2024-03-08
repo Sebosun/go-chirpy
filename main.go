@@ -8,11 +8,21 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sebosun/chirpy/api"
+	"github.com/sebosun/chirpy/db"
 )
 
 func main() {
 	const port = "8080"
-	apiConfig := api.ApiConfig{}
+
+	db, err := db.NewDB("database.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	apiConfig := api.ApiConfig{
+		FileserverHits: 0,
+		DB:             db,
+	}
 
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)

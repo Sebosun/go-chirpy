@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/sebosun/chirpy/db"
 	"log"
 	"net/http"
 )
@@ -11,19 +10,12 @@ type parameters struct {
 	Message string `json:"body"`
 }
 
-func HandleCreateChirp(w http.ResponseWriter, r *http.Request) {
-	db, err := db.NewDB("./database.json")
-	if err != nil {
-		log.Println("Error reading from the database", err)
-		RespondWithError(w, 500, "Something went wrong")
-		return
-	}
-
+func (cfg *ApiConfig) HandleCreateChirp(w http.ResponseWriter, r *http.Request) {
 	const maxMsgLen = 140
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err = decoder.Decode(&params)
+	err := decoder.Decode(&params)
 
 	if err != nil {
 		log.Printf("Error decoding parameters: %s", err)
@@ -36,12 +28,11 @@ func HandleCreateChirp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item, err := db.CreateChirp(parseMsg(params.Message))
+	item, err := cfg.DB.CreateChirp(parseMsg(params.Message))
 
 	if err != nil {
 		log.Printf("Error decoding parameters: %s", err)
 		RespondWithError(w, 500, "Something went wrong")
-		return
 	}
 
 	RespondWithJSON(w, 201, item)

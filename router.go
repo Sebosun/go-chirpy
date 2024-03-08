@@ -16,12 +16,14 @@ func appRouterFS() (http.Handler, http.Handler) {
 func apiRouter(cfg *api.ApiConfig) *chi.Mux {
 	apiRouter := chi.NewRouter()
 	apiRouter.HandleFunc("/reset", cfg.HandleReset)
-	apiRouter.Get("/healthz", api.HandleHealthz)
+	apiRouter.Get("/healthz", cfg.HandleHealthz)
 
-	apiRouter.Get("/chirps", api.HandleGetChirp)
-	apiRouter.Post("/chirps", api.HandleCreateChirp)
+	apiRouter.Get("/chirps", cfg.HandleGetChirp)
+	apiRouter.Post("/chirps", cfg.HandleCreateChirp)
+	apiRouter.Get("/chirps/{id}", cfg.HandleGetChirpById)
 
-	apiRouter.Get("/chirps/{id}", api.HandleGetChirpById)
+	apiRouter.Post("/users", cfg.HandleCreateUsers)
+	apiRouter.Get("/users", cfg.HandleGetUsers)
 
 	return apiRouter
 }

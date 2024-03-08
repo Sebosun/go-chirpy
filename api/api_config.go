@@ -2,11 +2,13 @@ package api
 
 import (
 	"fmt"
+	"github.com/sebosun/chirpy/db"
 	"net/http"
 )
 
 type ApiConfig struct {
 	FileserverHits int
+	DB             *db.DB
 }
 
 func (cfg *ApiConfig) MiddlewareMetricsInc(next http.Handler) http.Handler {
