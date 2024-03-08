@@ -21,9 +21,5 @@ func (db *DB) loadDB() (DBStructure, error) {
 		return DBStructure{}, err
 	}
 
-	if len(defDatabse.Chirps) == 0 {
-		defDatabse.Chirps = make(map[int]Chirp)
-	}
-
 	return defDatabse, nil
 }

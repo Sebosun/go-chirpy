@@ -8,7 +8,12 @@ import (
 func (db *DB) ensureDB() error {
 	_, err := os.ReadFile(db.path)
 	if err != nil {
-		defDatabse := DBStructure{}
+
+		defDatabse := DBStructure{
+			Chirps: make(map[int]Chirp),
+			Users:  make(map[int]User),
+		}
+
 		dat, err := json.Marshal(defDatabse)
 
 		if err != nil {
