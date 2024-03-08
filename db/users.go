@@ -6,15 +6,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type createdUser struct {
-	Id    int
-	Email string
+type CreatedUserReturnVal struct {
+	Id    int    `json:"id"`
+	Email string `json:"email"`
 }
 
-func (db *DB) CreateUser(email string, password string) (createdUser, error) {
+func (db *DB) CreateUser(email string, password string) (CreatedUserReturnVal, error) {
 	users, err := db.GetUsers()
 	if err != nil {
-		return createdUser{}, err
+		return CreatedUserReturnVal{}, err
 	}
 
 	newId := 1
@@ -31,7 +31,7 @@ func (db *DB) CreateUser(email string, password string) (createdUser, error) {
 	hashedPaswd, err := bcrypt.GenerateFromPassword([]byte(password), 4)
 
 	if err != nil {
-		return createdUser{}, err
+		return CreatedUserReturnVal{}, err
 
 	}
 	newUser := User{
@@ -46,10 +46,10 @@ func (db *DB) CreateUser(email string, password string) (createdUser, error) {
 	err = db.writeDB(dbMap)
 
 	if err != nil {
-		return createdUser{}, err
+		return CreatedUserReturnVal{}, err
 	}
 
-	userReturned := createdUser{
+	userReturned := CreatedUserReturnVal{
 		Id:    newUser.Id,
 		Email: newUser.Email,
 	}
@@ -68,4 +68,18 @@ func (db *DB) GetUsers() ([]User, error) {
 		acc = append(acc, val)
 	}
 	return acc, nil
+}
+
+func (db *DB) GetUserByEmail(email string) (User, error) {
+	dbMem, err := db.loadDB()
+	if err != nil {
+		return User{}, err
+	}
+	for _, val := range dbMem.Users {
+		if val.Email == email {
+			return val, nil
+		}
+	}
+
+	return User{}, nil
 }
