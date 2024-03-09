@@ -7,11 +7,14 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
 	"github.com/sebosun/chirpy/api"
 	"github.com/sebosun/chirpy/db"
 )
 
 func main() {
+	godotenv.Load()
+
 	const port = "8080"
 
 	db, err := db.NewDB("database.json")

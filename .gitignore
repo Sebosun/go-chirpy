@@ -1,6 +1,9 @@
 .out/*
 out
 
+env
+.env 
+
 database.json
 ./database.json
 *database.*
