@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"log"
 	"net/http"
 )
@@ -41,4 +43,33 @@ func (api *ApiConfig) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondWithJSON(w, 200, users)
+}
+
+type MyCustomClaims struct {
+	Issuer  string `json:"Issuer"`
+	Subject int    `json:"Subject"`
+	jwt.RegisteredClaims
+}
+
+func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
+	headers := r.Header.Get("Authorization")
+	if headers == "" {
+		RespondWithError(w, 401, "Missing authorization token ")
+		return
+	}
+	authToken, err := parseBearer(headers)
+	if err != nil {
+		RespondWithError(w, 401, "Invalid authorization token")
+		return
+	}
+
+	token, err := jwt.ParseWithClaims(authToken, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return token, nil
+	})
+
+	claims := token.Claims.(*MyCustomClaims)
+	id, err := claims.GetSubject()
+	fmt.Println(id)
+
+	RespondWithError(w, 500, "lol")
 }
