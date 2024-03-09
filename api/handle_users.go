@@ -3,19 +3,21 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
-type userReturnBody struct {
+type UserCreateBody struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 func (api *ApiConfig) HandleCreateUsers(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	user := userReturnBody{}
+	user := UserCreateBody{}
 	err := decoder.Decode(&user)
 
 	if err != nil {
@@ -51,12 +53,23 @@ type MyCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+type EditParams struct {
+	Message string `json:"body"`
+}
+
+type PutParameters struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
 	headers := r.Header.Get("Authorization")
+
 	if headers == "" {
 		RespondWithError(w, 401, "Missing authorization token ")
 		return
 	}
+
 	authToken, err := parseBearer(headers)
 	if err != nil {
 		RespondWithError(w, 401, "Invalid authorization token")
@@ -69,7 +82,36 @@ func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
 
 	claims := token.Claims.(*MyCustomClaims)
 	id, err := claims.GetSubject()
+
+	if err != nil {
+		RespondWithError(w, 401, "Invalid authorization token")
+		return
+	}
+
+	idInt, err := strconv.Atoi(id)
+
+	if err != nil {
+		RespondWithError(w, 401, "Invalid authorization token")
+	}
+
+	if err != nil {
+		RespondWithError(w, 401, "Invalid authorization token")
+		return
+	}
+
 	fmt.Println(id)
 
-	RespondWithError(w, 500, "lol")
+	decoder := json.NewDecoder(r.Body)
+	params := PutParameters{}
+	err = decoder.Decode(&params)
+
+	if err != nil {
+		log.Printf("Error decoding parameters: %s", err)
+		RespondWithError(w, 500, "Something went wrong")
+		return
+	}
+
+	api.DB.UpdateUsers(idInt, params.Email, params.Password)
+
+	w.WriteHeader(200)
 }

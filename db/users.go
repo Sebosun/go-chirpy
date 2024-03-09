@@ -1,9 +1,9 @@
 package db
 
 import (
-	"sort"
-
+	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"sort"
 )
 
 type CreatedUserReturnVal struct {
@@ -32,8 +32,8 @@ func (db *DB) CreateUser(email string, password string) (CreatedUserReturnVal, e
 
 	if err != nil {
 		return CreatedUserReturnVal{}, err
-
 	}
+
 	newUser := User{
 		Id:       newId,
 		Email:    email,
@@ -82,4 +82,58 @@ func (db *DB) GetUserByEmail(email string) (User, error) {
 	}
 
 	return User{}, nil
+}
+
+func (db *DB) UpdateUsers(id int, email string, password string) error {
+	users, err := db.GetUsers()
+
+	if err != nil {
+		return err
+	}
+
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Id < users[j].Id
+	})
+
+	userExists := false
+	var curUser User
+
+	for _, v := range users {
+		if v.Id == id {
+			userExists = true
+			curUser = v
+		}
+	}
+
+	if !userExists {
+		return errors.New("User doesnt exist")
+	}
+
+	if email != "" {
+		curUser.Email = email
+	}
+
+	if password != "" {
+		hashedPaswd, err := bcrypt.GenerateFromPassword([]byte(password), 4)
+		if err != nil {
+			return err
+		}
+		curUser.Password = string(hashedPaswd)
+	}
+
+	dbMap, err := db.loadDB()
+
+	if err != nil {
+		return err
+	}
+
+	dbMap.Users[id] = curUser
+
+	err = db.writeDB(dbMap)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
