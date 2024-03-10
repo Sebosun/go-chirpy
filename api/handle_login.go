@@ -3,12 +3,11 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/sebosun/chirpy/auth"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 type LoginParams struct {
@@ -42,30 +41,14 @@ func (api *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(foundUser.Password), []byte(user.Password))
+
 	if err != nil {
 		RespondWithError(w, 401, "Unauthorized")
 		return
 	}
 
-	var expiresAt time.Time
-
-	now := time.Now()
-	if user.ExpiresSeconds == 0 {
-		fullDay := time.Hour * 24
-		expiresAt = time.Now().Add(fullDay)
-	} else {
-		expiresAt = time.Now().Add(time.Duration(user.ExpiresSeconds))
-	}
-
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		Issuer:    "chirpy",
-		IssuedAt:  jwt.NewNumericDate(now),
-		ExpiresAt: jwt.NewNumericDate(expiresAt),
-		Subject:   fmt.Sprintf("%v", foundUser.Id),
-	})
-
 	jwtSecret := os.Getenv("JWT_SECRET")
-	jwtString, err := jwtToken.SignedString([]byte(jwtSecret))
+	jwtString, err := auth.CreateJWT(user.ExpiresSeconds, foundUser.Id, jwtSecret)
 
 	if err != nil {
 		fmt.Printf("Failed to parse jwtSecret %v", err)
@@ -79,6 +62,6 @@ func (api *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		Token: jwtString,
 	}
 
+	fmt.Println("JWT string: ", jwtString)
 	RespondWithJSON(w, 200, userRtrn)
-
 }

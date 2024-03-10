@@ -2,12 +2,13 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/sebosun/chirpy/auth"
+	"github.com/sebosun/chirpy/db"
 )
 
 type UserCreateBody struct {
@@ -47,16 +48,6 @@ func (api *ApiConfig) HandleGetUsers(w http.ResponseWriter, r *http.Request) {
 	RespondWithJSON(w, 200, users)
 }
 
-type MyCustomClaims struct {
-	Issuer  string `json:"Issuer"`
-	Subject int    `json:"Subject"`
-	jwt.RegisteredClaims
-}
-
-type EditParams struct {
-	Message string `json:"body"`
-}
-
 type PutParameters struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -76,30 +67,19 @@ func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := jwt.ParseWithClaims(authToken, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return token, nil
-	})
+	jwtSecret := os.Getenv("JWT_SECRET")
+	val, err := auth.ValidateJWT(authToken, jwtSecret)
 
-	claims := token.Claims.(*MyCustomClaims)
-	id, err := claims.GetSubject()
+	if err != nil {
+		RespondWithError(w, 401, "Invalid authorization token")
+	}
+
+	idInt, err := strconv.Atoi(val)
 
 	if err != nil {
 		RespondWithError(w, 401, "Invalid authorization token")
 		return
 	}
-
-	idInt, err := strconv.Atoi(id)
-
-	if err != nil {
-		RespondWithError(w, 401, "Invalid authorization token")
-	}
-
-	if err != nil {
-		RespondWithError(w, 401, "Invalid authorization token")
-		return
-	}
-
-	fmt.Println(id)
 
 	decoder := json.NewDecoder(r.Body)
 	params := PutParameters{}
@@ -112,6 +92,10 @@ func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.DB.UpdateUsers(idInt, params.Email, params.Password)
+	usrRtnr := db.CreatedUserReturnVal{
+		Id:    idInt,
+		Email: params.Email,
+	}
 
-	w.WriteHeader(200)
+	RespondWithJSON(w, 200, usrRtnr)
 }
