@@ -74,6 +74,7 @@ func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		RespondWithError(w, 401, "Invalid authorization token")
+		return
 	}
 
 	idInt, err := strconv.Atoi(val)
