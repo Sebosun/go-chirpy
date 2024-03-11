@@ -7,7 +7,7 @@ import (
 )
 
 /* // createChirp creates a new chirp and saves it to disk */
-func (db *DB) CreateChirp(body string) (Chirp, error) {
+func (db *DB) CreateChirp(body string, userId string) (Chirp, error) {
 	chirps, err := db.GetChirps()
 
 	if err != nil {
@@ -25,9 +25,16 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 		newId = chirps[lastIndx].Id + 1
 	}
 
+	usrIdInt, err := strconv.Atoi(userId)
+
+	if err != nil {
+		return Chirp{}, err
+	}
+
 	newChirp := Chirp{
-		Id:   newId,
-		Body: body,
+		Id:     newId,
+		Body:   body,
+		UserID: usrIdInt,
 	}
 
 	dbMap, err := db.loadDB()

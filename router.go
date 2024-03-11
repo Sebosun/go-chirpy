@@ -28,8 +28,8 @@ func apiRouter(cfg *api.ApiConfig) *chi.Mux {
 
 	apiRouter.Post("/login", cfg.HandleLogin)
 
-	apiRouter.Post("/refresh", cfg.HandleRefreshToken)
 	apiRouter.Post("/revoke", cfg.HandleRevoke)
+	apiRouter.Post("/refresh", cfg.HandleRefreshToken)
 
 	return apiRouter
 }

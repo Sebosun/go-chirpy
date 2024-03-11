@@ -2,20 +2,36 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/sebosun/chirpy/auth"
 	"log"
 	"net/http"
+	"os"
 )
 
-type parameters struct {
+type ChirpParams struct {
 	Message string `json:"body"`
 }
 
 func (cfg *ApiConfig) HandleCreateChirp(w http.ResponseWriter, r *http.Request) {
+	authToken, err := auth.ParseBearer(r.Header)
+	if err != nil {
+		RespondWithError(w, 401, err.Error())
+		return
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	usrId, err := auth.ValidateAccessJWT(authToken, jwtSecret)
+
+	if err != nil {
+		RespondWithError(w, 401, "Invalid authorization token")
+		return
+	}
+
 	const maxMsgLen = 140
 
 	decoder := json.NewDecoder(r.Body)
-	params := parameters{}
-	err := decoder.Decode(&params)
+	params := ChirpParams{}
+	err = decoder.Decode(&params)
 
 	if err != nil {
 		log.Printf("Error decoding parameters: %s", err)
@@ -28,7 +44,7 @@ func (cfg *ApiConfig) HandleCreateChirp(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	item, err := cfg.DB.CreateChirp(parseMsg(params.Message))
+	item, err := cfg.DB.CreateChirp(parseMsg(params.Message), usrId)
 
 	if err != nil {
 		log.Printf("Error decoding parameters: %s", err)

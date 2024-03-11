@@ -45,22 +45,22 @@ func CreateJWT(issuerName string, expirationTime time.Duration, userId int, secr
 }
 
 func ValidateAccessJWT(tokenString, tokenSecret string) (string, error) {
-	val, err := ValidateJWT(tokenString, tokenSecret, AccessName)
+	usrId, err := validateJWT(tokenString, tokenSecret, AccessName)
 	if err != nil {
 		return "", err
 	}
-	return val, nil
+	return usrId, nil
 }
 
 func ValidateRefreshJWT(tokenString, tokenSecret string) (string, error) {
-	val, err := ValidateJWT(tokenString, tokenSecret, RefreshName)
+	usrId, err := validateJWT(tokenString, tokenSecret, RefreshName)
 	if err != nil {
 		return "", err
 	}
-	return val, nil
+	return usrId, nil
 }
 
-func ValidateJWT(tokenString, tokenSecret, validInsuerName string) (string, error) {
+func validateJWT(tokenString, tokenSecret, validInsuerName string) (string, error) {
 	claimsStruct := jwt.RegisteredClaims{}
 	token, err := jwt.ParseWithClaims(
 		tokenString,

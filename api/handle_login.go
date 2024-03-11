@@ -64,6 +64,5 @@ func (api *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		TokenRefresh: jwtRefreshStr,
 	}
 
-	fmt.Println("JWT string: ", jwtAccessStr)
 	RespondWithJSON(w, 200, userRtrn)
 }
