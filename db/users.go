@@ -6,11 +6,6 @@ import (
 	"sort"
 )
 
-type CreatedUserReturnVal struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
-}
-
 func (db *DB) CreateUser(email string, password string) (CreatedUserReturnVal, error) {
 	users, err := db.GetUsers()
 	if err != nil {

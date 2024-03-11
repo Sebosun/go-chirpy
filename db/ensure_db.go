@@ -10,8 +10,9 @@ func (db *DB) ensureDB() error {
 	if err != nil {
 
 		defDatabse := DBStructure{
-			Chirps: make(map[int]Chirp),
-			Users:  make(map[int]User),
+			Chirps:     make(map[int]Chirp),
+			Users:      make(map[int]User),
+			RevokedJWT: make(map[string]string),
 		}
 
 		dat, err := json.Marshal(defDatabse)
