@@ -1,22 +1,39 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
-func CreateJWT(expirationTime int, userId int, secretToken string) (string, error) {
-	expiresAt := time.Hour * 24
+const AccessName = "chirpy-access"
+const RefreshName = "chirpy-refresh"
 
-	if expirationTime > 0 {
-		expiresAt = time.Duration(expirationTime)
+func CreateAccessJWT(userId int, secretToken string) (string, error) {
+	expirationTime := time.Hour * 24 // day
+	val, err := CreateJWT(AccessName, expirationTime, userId, secretToken)
+	if err != nil {
+		return "", err
 	}
+	return val, nil
+}
 
+func CreateRefreshJWT(userId int, secretToken string) (string, error) {
+	expirationTime := time.Hour * 24 * 60 // 60 days
+	val, err := CreateJWT(RefreshName, expirationTime, userId, secretToken)
+	if err != nil {
+		return "", err
+	}
+	return val, nil
+}
+
+func CreateJWT(issuerName string, expirationTime time.Duration, userId int, secretToken string) (string, error) {
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		Issuer:    "chirpy",
+		Issuer:    issuerName,
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(expiresAt)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(expirationTime)),
 		Subject:   fmt.Sprintf("%v", userId),
 	})
 
@@ -27,7 +44,7 @@ func CreateJWT(expirationTime int, userId int, secretToken string) (string, erro
 	return jwtString, nil
 }
 
-func ValidateJWT(tokenString, tokenSecret string) (string, error) {
+func ValidateAccessJWT(tokenString, tokenSecret string) (string, error) {
 	claimsStruct := jwt.RegisteredClaims{}
 	token, err := jwt.ParseWithClaims(
 		tokenString,
@@ -36,6 +53,15 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 	)
 	if err != nil {
 		return "", err
+	}
+
+	issuer, err := token.Claims.GetIssuer()
+	if err != nil {
+		return "", err
+	}
+
+	if issuer != AccessName {
+		return "", errors.New("Issuer does not grant route access")
 	}
 
 	userIDString, err := token.Claims.GetSubject()

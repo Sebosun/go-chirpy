@@ -11,15 +11,15 @@ import (
 )
 
 type LoginParams struct {
-	Email          string `json:"email"`
-	Password       string `json:"password"`
-	ExpiresSeconds int    `json:"expires_in_seconds"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type LoginReturn struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
-	Token string `json:"token"`
+	Id           int    `json:"id"`
+	Email        string `json:"email"`
+	Token        string `json:"token"`
+	TokenRefresh string `json:"refresh_token"`
 }
 
 func (api *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,8 @@ func (api *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
-	jwtString, err := auth.CreateJWT(user.ExpiresSeconds, foundUser.Id, jwtSecret)
+	jwtAccessStr, err := auth.CreateAccessJWT(foundUser.Id, jwtSecret)
+	jwtRefreshStr, err := auth.CreateRefreshJWT(foundUser.Id, jwtSecret)
 
 	if err != nil {
 		fmt.Printf("Failed to parse jwtSecret %v", err)
@@ -57,11 +58,12 @@ func (api *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userRtrn := LoginReturn{
-		Id:    foundUser.Id,
-		Email: foundUser.Email,
-		Token: jwtString,
+		Id:           foundUser.Id,
+		Email:        foundUser.Email,
+		Token:        jwtAccessStr,
+		TokenRefresh: jwtRefreshStr,
 	}
 
-	fmt.Println("JWT string: ", jwtString)
+	fmt.Println("JWT string: ", jwtAccessStr)
 	RespondWithJSON(w, 200, userRtrn)
 }

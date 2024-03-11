@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -57,18 +58,19 @@ func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
 	headers := r.Header.Get("Authorization")
 
 	if headers == "" {
-		RespondWithError(w, 401, "Missing authorization token ")
+		RespondWithError(w, 401, "Authorization token missing header")
 		return
 	}
 
 	authToken, err := parseBearer(headers)
+	fmt.Println(authToken)
 	if err != nil {
 		RespondWithError(w, 401, "Invalid authorization token")
 		return
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
-	val, err := auth.ValidateJWT(authToken, jwtSecret)
+	val, err := auth.ValidateAccessJWT(authToken, jwtSecret)
 
 	if err != nil {
 		RespondWithError(w, 401, "Invalid authorization token")
