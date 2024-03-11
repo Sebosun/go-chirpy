@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -55,15 +54,7 @@ type PutParameters struct {
 }
 
 func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
-	headers := r.Header.Get("Authorization")
-
-	if headers == "" {
-		RespondWithError(w, 401, "Authorization token missing header")
-		return
-	}
-
-	authToken, err := parseBearer(headers)
-	fmt.Println(authToken)
+	authToken, err := auth.ParseBearer(r.Header)
 	if err != nil {
 		RespondWithError(w, 401, "Invalid authorization token")
 		return
