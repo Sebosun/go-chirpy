@@ -3,8 +3,6 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -47,6 +45,22 @@ func CreateJWT(issuerName string, expirationTime time.Duration, userId int, secr
 }
 
 func ValidateAccessJWT(tokenString, tokenSecret string) (string, error) {
+	val, err := ValidateJWT(tokenString, tokenSecret, AccessName)
+	if err != nil {
+		return "", err
+	}
+	return val, nil
+}
+
+func ValidateRefreshJWT(tokenString, tokenSecret string) (string, error) {
+	val, err := ValidateJWT(tokenString, tokenSecret, RefreshName)
+	if err != nil {
+		return "", err
+	}
+	return val, nil
+}
+
+func ValidateJWT(tokenString, tokenSecret, validInsuerName string) (string, error) {
 	claimsStruct := jwt.RegisteredClaims{}
 	token, err := jwt.ParseWithClaims(
 		tokenString,
@@ -62,8 +76,8 @@ func ValidateAccessJWT(tokenString, tokenSecret string) (string, error) {
 		return "", err
 	}
 
-	if issuer != AccessName {
-		return "", errors.New("Issuer does not grant route access")
+	if issuer != validInsuerName {
+		return "", errors.New("Issuer does not grant access")
 	}
 
 	userIDString, err := token.Claims.GetSubject()
@@ -72,20 +86,4 @@ func ValidateAccessJWT(tokenString, tokenSecret string) (string, error) {
 	}
 
 	return userIDString, nil
-}
-
-func ParseBearer(r http.Header) (string, error) {
-	header := r.Get("Authorization")
-
-	if header == "" {
-		return "", errors.New("Invalid authorization token")
-	}
-
-	bearerSplit := strings.Split(header, " ")
-
-	if len(bearerSplit) != 2 || bearerSplit[0] != "Bearer" {
-		return "", errors.New("Invalid authorization token")
-	}
-
-	return bearerSplit[1], nil
 }

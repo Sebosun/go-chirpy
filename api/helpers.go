@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"strings"
@@ -60,13 +59,4 @@ func parseMsg(msg string) string {
 	}
 
 	return strings.Join(acc, " ")
-}
-
-func parseBearer(header string) (string, error) {
-	bearerSplit := strings.Split(header, " ")
-	if len(bearerSplit) != 2 || bearerSplit[0] != "Bearer" {
-		return "", errors.New("Invalid authorization token")
-	}
-
-	return bearerSplit[1], nil
 }
