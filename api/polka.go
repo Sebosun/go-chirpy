@@ -3,9 +3,9 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
-
+	"github.com/sebosun/chirpy/auth"
 	"github.com/sebosun/chirpy/db"
+	"net/http"
 )
 
 type WebhookPayload struct {
@@ -18,9 +18,15 @@ type WebhookData struct {
 }
 
 func (api *ApiConfig) HandlePolkaWebhook(w http.ResponseWriter, r *http.Request) {
+	err := auth.ParsePolka(r.Header)
+	if err != nil {
+		RespondWithError(w, 401, "Invalid API key")
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	params := WebhookPayload{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 
 	if err != nil {
 		RespondWithError(w, 500, "Error decoding json")
