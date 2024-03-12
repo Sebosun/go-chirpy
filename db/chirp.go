@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+func MsgNotBelongUser() error {
+	return errors.New("Message does not belong to the user")
+}
+
 /* // createChirp creates a new chirp and saves it to disk */
 func (db *DB) CreateChirp(body string, userId string) (Chirp, error) {
 	chirps, err := db.GetChirps()
@@ -81,4 +85,51 @@ func (db *DB) GetChirpsById(desiredId string) (Chirp, error) {
 	}
 
 	return Chirp{}, errors.New("Coudln't find chirp")
+}
+
+func (db *DB) DeleteChirpsById(chirpId, userId string) error {
+	searchIdInt, err := strconv.Atoi(chirpId)
+	userIdInt, err := strconv.Atoi(userId)
+
+	if err != nil {
+		return err
+	}
+
+	dbMem, err := db.loadDB()
+	if err != nil {
+		return err
+	}
+
+	isFound := false
+	var foundChirp Chirp
+
+	for _, chirp := range dbMem.Chirps {
+		if chirp.Id == searchIdInt {
+			isFound = true
+			foundChirp = chirp
+		}
+	}
+
+	if !isFound {
+		return errors.New("Message not found")
+	}
+
+	if foundChirp.UserID != userIdInt {
+		return MsgNotBelongUser()
+	}
+
+	acc := make(map[int]Chirp)
+	for _, chirp := range dbMem.Chirps {
+		if chirp.Id != searchIdInt {
+			acc[chirp.Id] = chirp
+		}
+	}
+
+	dbMem.Chirps = acc
+	err = db.writeDB(dbMem)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

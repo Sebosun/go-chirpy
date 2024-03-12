@@ -21,6 +21,7 @@ func apiRouter(cfg *api.ApiConfig) *chi.Mux {
 	apiRouter.Get("/chirps", cfg.HandleGetChirp)
 	apiRouter.Post("/chirps", cfg.HandleCreateChirp)
 	apiRouter.Get("/chirps/{id}", cfg.HandleGetChirpById)
+	apiRouter.Delete("/chirps/{id}", cfg.HandleDeleteChirpById)
 
 	apiRouter.Post("/users", cfg.HandleCreateUsers)
 	apiRouter.Get("/users", cfg.HandleGetUsers)
