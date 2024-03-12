@@ -5,7 +5,6 @@ import (
 	"github.com/sebosun/chirpy/auth"
 	"log"
 	"net/http"
-	"os"
 )
 
 type ChirpParams struct {
@@ -13,17 +12,9 @@ type ChirpParams struct {
 }
 
 func (cfg *ApiConfig) HandleCreateChirp(w http.ResponseWriter, r *http.Request) {
-	authToken, err := auth.ParseBearer(r.Header)
+	usrId, err := auth.HandleAuthUser(r)
 	if err != nil {
 		RespondWithError(w, 401, err.Error())
-		return
-	}
-
-	jwtSecret := os.Getenv("JWT_SECRET")
-	usrId, err := auth.ValidateAccessJWT(authToken, jwtSecret)
-
-	if err != nil {
-		RespondWithError(w, 401, "Invalid authorization token")
 		return
 	}
 
