@@ -20,6 +20,7 @@ type LoginReturn struct {
 	Email        string `json:"email"`
 	Token        string `json:"token"`
 	TokenRefresh string `json:"refresh_token"`
+	IsChirpyRed  bool   `json:"is_chirpy_red"`
 }
 
 func (api *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +61,7 @@ func (api *ApiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	userRtrn := LoginReturn{
 		Id:           foundUser.Id,
 		Email:        foundUser.Email,
+		IsChirpyRed:  foundUser.IsChirpyRed,
 		Token:        jwtAccessStr,
 		TokenRefresh: jwtRefreshStr,
 	}

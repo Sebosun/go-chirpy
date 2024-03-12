@@ -86,7 +86,7 @@ func (api *ApiConfig) HandlePutUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.DB.UpdateUsers(idInt, params.Email, params.Password)
-	usrRtnr := db.CreatedUserReturnVal{
+	usrRtnr := db.UserCreatedReturn{
 		Id:    idInt,
 		Email: params.Email,
 	}

@@ -6,10 +6,14 @@ import (
 	"sort"
 )
 
-func (db *DB) CreateUser(email string, password string) (CreatedUserReturnVal, error) {
+func ErrorUserDoesntExist() error {
+	return errors.New("User doesnt exist")
+}
+
+func (db *DB) CreateUser(email string, password string) (UserCreatedReturn, error) {
 	users, err := db.GetUsers()
 	if err != nil {
-		return CreatedUserReturnVal{}, err
+		return UserCreatedReturn{}, err
 	}
 
 	newId := 1
@@ -26,7 +30,7 @@ func (db *DB) CreateUser(email string, password string) (CreatedUserReturnVal, e
 	hashedPaswd, err := bcrypt.GenerateFromPassword([]byte(password), 4)
 
 	if err != nil {
-		return CreatedUserReturnVal{}, err
+		return UserCreatedReturn{}, err
 	}
 
 	newUser := User{
@@ -41,10 +45,10 @@ func (db *DB) CreateUser(email string, password string) (CreatedUserReturnVal, e
 	err = db.writeDB(dbMap)
 
 	if err != nil {
-		return CreatedUserReturnVal{}, err
+		return UserCreatedReturn{}, err
 	}
 
-	userReturned := CreatedUserReturnVal{
+	userReturned := UserCreatedReturn{
 		Id:    newUser.Id,
 		Email: newUser.Email,
 	}
@@ -79,11 +83,11 @@ func (db *DB) GetUserByEmail(email string) (User, error) {
 	return User{}, nil
 }
 
-func (db *DB) UpdateUsers(id int, email string, password string) error {
+func (db *DB) getUserById(id int) (User, error) {
 	users, err := db.GetUsers()
 
 	if err != nil {
-		return err
+		return User{}, err
 	}
 
 	sort.Slice(users, func(i, j int) bool {
@@ -99,11 +103,39 @@ func (db *DB) UpdateUsers(id int, email string, password string) error {
 			curUser = v
 		}
 	}
-
 	if !userExists {
-		return errors.New("User doesnt exist")
+		return User{}, ErrorUserDoesntExist()
 	}
 
+	return curUser, nil
+}
+
+func (db *DB) UpgradeUserPremium(id int) error {
+	curUser, err := db.getUserById(id)
+	if err != nil {
+		return err
+	}
+
+	dbMap, err := db.loadDB()
+	if err != nil {
+		return err
+	}
+
+	curUser.IsChirpyRed = true
+	dbMap.Users[id] = curUser
+	err = db.writeDB(dbMap)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) UpdateUsers(id int, email string, password string) error {
+	curUser, err := db.getUserById(id)
+	if err != nil {
+		return err
+	}
 	if email != "" {
 		curUser.Email = email
 	}
