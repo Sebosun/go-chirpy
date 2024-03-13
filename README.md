@@ -12,9 +12,36 @@ Health check endpoint
 
 Returns an array of AllChirps
 
-### GET /api/chirps?author_id={id}
+Accepts the following query params:
+
+author_id
+
+- id of desired author
+
+sort
+
+- asc
+- desc
+
+Example:
+
+/api/chirps?author_id={id}
 
 Returns an array of chirps for author with given id
+
+Example
+
+```
+/api/chirps?sort=asc
+```
+
+Returns query sorted in ascending order
+
+Those can be combined
+
+```
+/api/chirps?author_id=2&sort=asc
+```
 
 ### POST /api/chirps
 
