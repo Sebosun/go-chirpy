@@ -11,12 +11,25 @@ import (
 )
 
 func (cfg *ApiConfig) HandleGetChirp(w http.ResponseWriter, r *http.Request) {
-	chirps, err := cfg.DB.GetChirps()
+	var chirps []db.Chirp
+	s := r.URL.Query().Get("author_id")
+	if s == "" {
+		c, err := cfg.DB.GetChirps()
+		chirps = c
+		if err != nil {
+			log.Println("Error accessing db", err)
+			RespondWithError(w, 500, "Something went wrong")
+			return
+		}
+	} else {
+		c, err := cfg.DB.GetChirpsByAuthorId(s)
+		chirps = c
+		if err != nil {
+			log.Println("Error accessing db", err)
+			RespondWithError(w, 500, "Something went wrong")
+			return
+		}
 
-	if err != nil {
-		log.Println("Error accessing db", err)
-		RespondWithError(w, 500, "Something went wrong")
-		return
 	}
 
 	RespondWithJSON(w, 200, chirps)

@@ -66,6 +66,29 @@ func (db *DB) GetChirps() ([]Chirp, error) {
 	return acc, nil
 }
 
+func (db *DB) GetChirpsByAuthorId(authorId string) ([]Chirp, error) {
+	authIdInt, err := strconv.Atoi(authorId)
+
+	if err != nil {
+		return []Chirp{}, err
+	}
+
+	dbMem, err := db.loadDB()
+	if err != nil {
+		return []Chirp{}, err
+	}
+
+	var acc []Chirp
+
+	for _, chirp := range dbMem.Chirps {
+		if chirp.UserID == authIdInt {
+			acc = append(acc, chirp)
+		}
+	}
+
+	return acc, nil
+}
+
 func (db *DB) GetChirpsById(desiredId string) (Chirp, error) {
 	searchId, err := strconv.Atoi(desiredId)
 
