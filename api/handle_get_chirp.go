@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"sort"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sebosun/chirpy/auth"
@@ -12,8 +13,9 @@ import (
 
 func (cfg *ApiConfig) HandleGetChirp(w http.ResponseWriter, r *http.Request) {
 	var chirps []db.Chirp
-	s := r.URL.Query().Get("author_id")
-	if s == "" {
+	queryAuthId := r.URL.Query().Get("author_id")
+	querySort := r.URL.Query().Get("sort")
+	if queryAuthId == "" {
 		c, err := cfg.DB.GetChirps()
 		chirps = c
 		if err != nil {
@@ -22,7 +24,7 @@ func (cfg *ApiConfig) HandleGetChirp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		c, err := cfg.DB.GetChirpsByAuthorId(s)
+		c, err := cfg.DB.GetChirpsByAuthorId(queryAuthId)
 		chirps = c
 		if err != nil {
 			log.Println("Error accessing db", err)
@@ -30,6 +32,18 @@ func (cfg *ApiConfig) HandleGetChirp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+	}
+
+	if querySort == "asc" {
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].Id < chirps[j].Id
+		})
+	}
+
+	if querySort == "desc" {
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].Id > chirps[j].Id
+		})
 	}
 
 	RespondWithJSON(w, 200, chirps)
