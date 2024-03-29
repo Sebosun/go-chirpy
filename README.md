@@ -64,6 +64,17 @@ Get Chirp with given ID
 
 Deletes Chirp with given ID if it belongs to current user
 
+### POST /api/users
+
+Create User endpoint
+
+```JSON
+{
+	"email": "test@gmail.com"
+	"password": "abc123"
+}
+```
+
 ### GET /api/users
 
 Returns an array of all users

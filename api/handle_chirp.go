@@ -8,7 +8,7 @@ import (
 )
 
 type ChirpParams struct {
-	Message string `json:"body"`
+	Message string `json:"message"`
 }
 
 func (cfg *ApiConfig) HandleCreateChirp(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +27,11 @@ func (cfg *ApiConfig) HandleCreateChirp(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		log.Printf("Error decoding parameters: %s", err)
 		RespondWithError(w, 500, "Something went wrong")
+		return
+	}
+
+	if len(params.Message) == 0 {
+		RespondWithError(w, 400, "Chirp is too short")
 		return
 	}
 
